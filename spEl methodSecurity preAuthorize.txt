@@ -1,0 +1,78 @@
+BB: Use Spring Expression language and call a custom method in a class to implement method security in spring boot
+GPT:
+To implement method security in Spring Boot using Spring Expression Language (SpEL) and a custom method in a class, you can follow these steps:
+  1. Create a custom method in a class that will be used to check whether a user has the necessary permissions to access a method.
+     For example, let's create a method called hasPermission in a class called PermissionEvaluator:
+     ```
+     @Component
+public class PermissionEvaluator {
+    public boolean hasPermission(Authentication authentication, Object targetObject, Object permission) {
+        // implementation of the method to check permissions
+    }
+}
+     ```
+   2. In the Spring Security configuration class, configure method security by adding the @EnableGlobalMethodSecurity annotation 
+      and setting the prePostEnabled attribute to true to enable method-level security annotations:
+      ```
+      @Configuration
+@EnableGlobalMethodSecurity(prePostEnabled = true)
+public class MethodSecurityConfig extends GlobalMethodSecurityConfiguration {
+    // configuration of method security
+}
+
+      ```
+    3. Create a security expression that will call the custom method hasPermission in the PermissionEvaluator class. The security expression will be used in the method-level 
+       security annotation. For example, let's create a security expression that checks if a user has the ROLE_ADMIN role:
+       ```
+       @PreAuthorize("hasPermission(#authentication, #targetObject, 'ROLE_ADMIN')")
+public void someMethod(Authentication authentication, Object targetObject) {
+    // implementation of the secured method
+}
+
+       ```
+      4. Use the security expression in the method-level security annotation to secure a method. For example, let's secure a method called someMethod:
+      ```
+      @Service
+public class MyService {
+    @PreAuthorize
+
+      ```
+      
+      network error
+
+Step 4: Configure the security for method-level access by adding the @EnableGlobalMethodSecurity annotation to your security configuration class
+ with prePostEnabled attribute set to true, and the @PreAuthorize annotation on the methods to be secured. The @PreAuthorize annotation will evaluate
+ the SpEL expression to check if the user has permission to access the method.
+
+Here's an example configuration:
+```
+@Configuration
+@EnableGlobalMethodSecurity(prePostEnabled = true)
+public class MethodSecurityConfig extends GlobalMethodSecurityConfiguration {
+
+    @Autowired
+    private CustomSecurity customSecurity;
+
+    @Override
+    protected MethodSecurityExpressionHandler createExpressionHandler() {
+        DefaultMethodSecurityExpressionHandler expressionHandler = new DefaultMethodSecurityExpressionHandler();
+        expressionHandler.setPermissionEvaluator(new CustomPermissionEvaluator(customSecurity));
+        return expressionHandler;
+    }
+
+}
+
+
+```
+In the above example, we have defined a CustomSecurity class and autowired it in the MethodSecurityConfig class. We then override the createExpressionHandler method to create a custom expression handler that sets our CustomSecurity class as the PermissionEvaluator used by the @PreAuthorize annotation.
+
+Step 5: Use the @PreAuthorize annotation to secure the method. Here's an example:
+@Service
+public class MyService {
+
+    @PreAuthorize("@customSecurity.hasPermission(#resource)")
+    public void doSomething(String resource) {
+        // Your logic for the secured method
+    }
+
+}
